@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生成預覽圖片</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #1a1a1a;
+      color: #fff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    canvas {
+      border: 2px solid #444;
+      max-width: 100%;
+      height: auto;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .info {
+      text-align: center;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <h1>新年賀卡預覽圖產生器</h1>
+  <canvas id="canvas" width="1200" height="630"></canvas>
+  <button onclick="downloadImage()">下載 preview.png</button>
+  <div class="info">
+    <p>圖片尺寸: 1200×630 (適用於 Facebook、Twitter、LINE 等)</p>
+    <p>點擊按鈕即可下載</p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // 背景漸層 - 深藍色基底
+    const bgGradient = ctx.createLinearGradient(0, 0, 0, height);
+    bgGradient.addColorStop(0, 'rgb(6, 10, 26)');
+    bgGradient.addColorStop(1, 'rgb(6, 7, 18)');
+    ctx.fillStyle = bgGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // 添加藍色光暈
+    const blueGlow = ctx.createRadialGradient(200, 150, 0, 200, 150, 400);
+    blueGlow.addColorStop(0, 'rgba(80, 170, 255, 0.25)');
+    blueGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = blueGlow;
+    ctx.fillRect(0, 0, width, height);
+
+    // 添加金色光暈
+    const goldGlow = ctx.createRadialGradient(1000, 180, 0, 1000, 180, 450);
+    goldGlow.addColorStop(0, 'rgba(255, 208, 120, 0.22)');
+    goldGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = goldGlow;
+    ctx.fillRect(0, 0, width, height);
+
+    // 底部金色光暈
+    const bottomGlow = ctx.createRadialGradient(600, 630, 0, 600, 630, 500);
+    bottomGlow.addColorStop(0, 'rgba(255, 180, 90, 0.15)');
+    bottomGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = bottomGlow;
+    ctx.fillRect(0, 0, width, height);
+
+    // 添加星星效果
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    const stars = [
+      {x: 150, y: 100, size: 2},
+      {x: 300, y: 200, size: 1.5},
+      {x: 950, y: 150, size: 2},
+      {x: 1050, y: 300, size: 1.5},
+      {x: 450, y: 450, size: 1.8},
+      {x: 800, y: 500, size: 1.5},
+      {x: 200, y: 520, size: 1.6},
+      {x: 1100, y: 550, size: 1.7}
+    ];
+    stars.forEach(star => {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // 繪製卡片
+    const cardX = 150;
+    const cardY = 100;
+    const cardWidth = 900;
+    const cardHeight = 430;
+    const cardRadius = 20;
+
+    // 卡片背景（半透明玻璃效果）
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardWidth, cardHeight, cardRadius);
+    ctx.fill();
+
+    // 卡片邊框
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // 卡片內部金色光暈
+    const cardGlow = ctx.createRadialGradient(1000, 150, 0, 1000, 150, 400);
+    cardGlow.addColorStop(0, 'rgba(255, 208, 120, 0.15)');
+    cardGlow.addColorStop(1, 'transparent');
+    ctx.fillStyle = cardGlow;
+    ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
+
+    // 頂部標籤 "HAPPY NEW YEAR"
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+    ctx.beginPath();
+    ctx.roundRect(cardX + 350, cardY + 60, 200, 36, 18);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 208, 120, 0.25)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.font = '600 13px system-ui';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.textAlign = 'center';
+    ctx.letterSpacing = '3px';
+    ctx.fillText('HAPPY NEW YEAR', cardX + 450, cardY + 82);
+
+    // 主標題 "新年快樂"
+    ctx.font = 'bold 80px "Segoe Script", cursive, "Microsoft JhengHei"';
+    const titleGradient = ctx.createLinearGradient(cardX + 200, 0, cardX + 700, 0);
+    titleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.92)');
+    titleGradient.addColorStop(0.3, 'rgba(255, 208, 120, 0.98)');
+    titleGradient.addColorStop(0.6, 'rgba(255, 242, 210, 0.92)');
+    titleGradient.addColorStop(1, 'rgba(255, 255, 255, 0.92)');
+    ctx.fillStyle = titleGradient;
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(255, 208, 120, 0.3)';
+    ctx.shadowBlur = 25;
+    ctx.fillText('新年快樂', cardX + 450, cardY + 180);
+
+    // 年份 "2026"
+    ctx.shadowBlur = 30;
+    ctx.shadowColor = 'rgba(120, 200, 255, 0.3)';
+    ctx.font = 'bold 110px system-ui';
+    const yearGradient = ctx.createLinearGradient(cardX + 250, 0, cardX + 650, 0);
+    yearGradient.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+    yearGradient.addColorStop(0.5, 'rgba(120, 200, 255, 0.90)');
+    yearGradient.addColorStop(1, 'rgba(255, 208, 120, 0.95)');
+    ctx.fillStyle = yearGradient;
+    ctx.fillText('2026', cardX + 450, cardY + 295);
+
+    // 祝福語
+    ctx.shadowBlur = 0;
+    ctx.font = '600 21px "Segoe Script", cursive, "Microsoft JhengHei"';
+    const wishGradient = ctx.createLinearGradient(cardX + 150, 0, cardX + 750, 0);
+    wishGradient.addColorStop(0, 'rgba(255, 255, 255, 0.90)');
+    wishGradient.addColorStop(0.5, 'rgba(255, 208, 120, 0.95)');
+    wishGradient.addColorStop(1, 'rgba(255, 255, 255, 0.90)');
+    ctx.fillStyle = wishGradient;
+    ctx.fillText('願你的 2026 年如金光閃耀', cardX + 450, cardY + 355);
+
+    ctx.font = '600 19px "Segoe Script", cursive, "Microsoft JhengHei"';
+    ctx.fillText('如深海沉穩，每一步都被好運照亮', cardX + 450, cardY + 385);
+
+    // 底部文字
+    ctx.font = '500 16px system-ui';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+    ctx.fillText('聯通開發團隊 祝您新年快樂！', cardX + 450, cardY + 420);
+
+    // 下載圖片函數
+    function downloadImage() {
+      const link = document.createElement('a');
+      link.download = 'preview.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
